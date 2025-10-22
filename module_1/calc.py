@@ -18,12 +18,14 @@ def calc(a, b, operator: str):
     elif isinstance(a, (int, float)) and isinstance(b, (int, float)):
         if operator == '-':
             return a - b
-    '''  
-    Выполнено задание поиск с помощьью отладчика, выявлен недостаток - деление на 0
-    Исправляется с помощью try/except
-    '''
+
+        # Выполнено задание поиск с помощьью отладчика, выявлен недостаток - деление на 0
+        # Исправляется с помощью try/except
         if operator == '/':
-            return a / b
+            try:
+                return a / b
+            except ZeroDivisionError:
+                raise ZeroDivisionError('Деление на ноль невозможно!')
         if operator == '*':
             return a * b
 
@@ -31,8 +33,8 @@ def calc(a, b, operator: str):
         return 'Что-то пошло не так!'
 
 if __name__ == "__main__":
-    a = input()
-    b = input()
-    operator = input()
+    a = input('Введите 1-ое значение: ')
+    b = input('Введите 2-ое значение:')
+    operator = input('Введите оператор *, +, - или /: ')
 
     print(calc(a, b, operator))
