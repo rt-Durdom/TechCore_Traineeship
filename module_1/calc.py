@@ -18,6 +18,10 @@ def calc(a, b, operator: str):
     elif isinstance(a, (int, float)) and isinstance(b, (int, float)):
         if operator == '-':
             return a - b
+    '''  
+    Выполнено задание поиск с помощьью отладчика, выявлен недостаток - деление на 0
+    Исправляется с помощью try/except
+    '''
         if operator == '/':
             return a / b
         if operator == '*':
