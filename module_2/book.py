@@ -16,8 +16,7 @@ class Ebook(Book):
 
     def __repr__(self):
         return (
-            f'{self.__class__.__name__}:'
-            f' "{self.title}", "{self.author}",'
+            f'{super().__repr__()},'
             f' Размер файла: {self.file_size}'
         )
 
