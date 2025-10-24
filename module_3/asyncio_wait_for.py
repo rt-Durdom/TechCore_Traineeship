@@ -6,7 +6,6 @@ async def eternity():
     print('Програма сна заверешна!')
 
 
-
 async def main():
     try:
         await asyncio.wait_for(eternity(), timeout=2)
