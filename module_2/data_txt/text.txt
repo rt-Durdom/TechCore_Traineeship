@@ -1,0 +1,484 @@
+Генераторы в Python
+Простой
+10 мин
+29K
+Python
+*
+Генератор и генераторная функция
+Генератор - это особый вид итератора - объекта, который отдает значения по одному за раз. Любая функция содержащая yield является генераторной функцией. При вызове генераторная функция возвращает генератор-итератор или просто генератор. Генераторная функция и генератор - это разные объекты, хотя и связанные друг с другом.
+
+# создаем генераторную функцию
+def gen_function():
+    yield 10
+
+# генераторная функция возвращает генератор
+gen = gen_function()
+Проверим тип генераторной функции и генератора используя type и функции isgeneratorfunction, isgenerator из модуля inspect.
+
+from inspect import isgeneratorfunction, isgenerator
+
+def gen_function():
+    yield 10
+
+gen = gen_function()
+
+print('type gen_function is', type(gen_function))
+print('type gen is', type(gen))
+
+print('gen_function is generatorfunction: ', isgeneratorfunction(gen_function))
+print('gen_function is generator: ', isgenerator(gen_function))
+
+print('gen is generatorfunction: ', isgeneratorfunction(gen))
+print('gen is generator: ', isgenerator(gen))
+type gen_function is <class 'function'>
+type gen is <class 'generator'>
+
+gen_function is generatorfunction: True
+gen_function is generator: False
+
+gen is generatorfunction: False
+gen is generator: True
+Видим что gen_function имеет тип function и к тому же это еще и генераторная функция. При вызове gen_function() вернулся объект gen который является генератором.
+
+Получение значений из генератора
+Так же как и итератор, генератор не хранит все значения, а вычисляет их "на лету". Генератор можно обойти только один раз. Когда мы запрашиваем значение из генератора выполняется тело генератора до ключевого слова yield. Встретив yield генератор возвращает значение, стоящее справа от yield в вызвавший его код и запоминает свою позицию. Если значение справа от yield отсутствует, то генератор возвращает None. Когда мы в следующий раз запросим значение из генератора, то выполнение продолжится с сохраненной позиции до следующего yield и так же вернется значение справа от yield. Получить значение из генератора можно в цикле или используя функции next и send.
+
+Получение значений в цикле
+Генератор является итератором. Итератор, в свою очередь, это объект, по которому можно итерироваться. Следовательно и по генератору тоже можно итерироваться. Рассмотрим пример итерации в цикле for. Создадим простую генераторную функцию которая возвращает число и уменьшает его на единицу.
+
+def gen_function(n):
+    while n > 0:
+        yield n
+        n -= 1
+
+gen = gen_function(5)
+
+for v in gen:
+    print(v)
+5
+4
+3
+2
+1
+"Под капотом" цикл for вызывает у генератора метод __iter__, который возвращает итератор и на каждой итерации цикла вызывается метод __next__ у полученного итератора.
+
+Получение значений через вызов next
+Получить значение из генератора можно вызвав функцию next и передав в нее генератор. Функция next вызывает метод __next__ у переданного в нее объекта. То есть вызов next(gen) и gen.__next__() равнозначны и дают один и тот же результат.
+
+def gen_function(n):
+    while n > 0:
+        yield n
+        n -= 1
+
+gen = gen_function(5)
+
+# здесь вызываем функцию next и передаем в нее генератор
+print(next(gen))
+
+# здесь вызываем метод __next__ у генератора
+print(gen.__next__())
+
+print(next(gen))
+print(next(gen))
+print(next(gen))
+5
+4
+3
+2
+1
+Как работает генератор
+При создании генератора стартовая позиция находится в самом начале генератора. В нашем примере это строка while n > 0:
+
+При вызове метода next генератор выполняется до тех пор, пока не встретит yield
+
+Встретив yield генератор возвращает значение записанное в переменную n и запоминает позицию
+
+Вызываем еще раз метод next. Генератор снова выполняется до следующего yield, возвращает следующее значение и снова запоминает позицию.
+
+Так продолжается до тех пор, пока генератор не опустеет или не встретит ключевое слово return
+
+
+Завершение работы генератора
+Когда в генераторе больше нет значений или генератор встречает return, то выбрасывается исключение StopIteration. Создадим генераторную функцию и вызовем ее со значением 3. И далее четыре раза вызовем next. Генератор отдал три значения, а на четвертый вызов next цикл while внутри генератора завершился, в генераторе больше не осталось значений и выбросилось исключение StopIteration.
+
+def gen_function(n):
+    while n > 0:
+        yield n
+        n -= 1
+
+gen = gen_function(3)
+print(next(gen))
+print(next(gen))
+print(next(gen))
+print(next(gen))
+3
+2
+1
+Traceback (most recent call last):
+  File "d:\dev\learning\common\test_3.py", line 10, in <module>
+    print(next(gen))
+StopIteration
+Помимо yield генератор может содержать и return. Встретив return генератор выбрасывает исключение StopIteration, а возвращенное значение записывается в объект StopIteration в атрибут value.
+Создадим генераторную функцию и добавим строку return 100. Теперь при четвертом вызове next отловим исключение StopIteration и выведем значение, которое хранится в атрибуте value этого исключения. Получим 100 - ровно то что вернул нам генератор.
+
+def gen_function(n):
+    while n > 0:
+        yield n
+        n -= 1
+    return 100
+
+gen = gen_function(3)
+print(next(gen))
+print(next(gen))
+print(next(gen))
+try:
+    print(next(gen))
+except StopIteration as e:
+    print(e.value)
+3
+2
+1
+100
+Если мы не будем указывать return, то в атрибуте value исключения StopIteration будет находится значение None.
+
+def gen_function(n):
+    while n > 0:
+        yield n
+        n -= 1
+
+gen = gen_function(3)
+print(next(gen))
+print(next(gen))
+print(next(gen))
+try:
+    print(next(gen))
+except StopIteration as e:
+    print(e.value)
+3
+2
+1
+None
+У генератора есть метод close при вызове которого выбрасывается исключение GeneratorExit и генератор завершает свою работу. Если после вызова close мы попытаемся получить значение из генератора, то будет выброшено исключение StopIteration.
+
+def gen_function(n):
+    while n > 0:
+        yield n
+        n -= 1
+
+gen = gen_function(3)
+
+print(next(gen))
+gen.close()
+print(next(gen))
+3
+Traceback (most recent call last):
+  File "d:\dev\learning\common\test_3.py", line 10, in <module>
+    print(next(gen))
+StopIteration
+Обратите внимание в выводе нет никакого исключения GeneratorExit. А все потому, что оно выбрасывается в "тихом" режиме и не поднимается в вызывающий код. Но мы можем убедиться, что оно действительно было выброшено, добавив в генератор блок try except.
+
+def gen_function(n):
+    while n > 0:
+        try:
+            yield n
+            n -= 1
+        except GeneratorExit:
+            print("Raise exception from generator")
+
+gen = gen_function(3)
+
+print(next(gen))
+gen.close()
+print(next(gen))
+3
+Raise exception from generator
+Traceback (most recent call last):
+  File "d:\dev\learning\common\test_3.py", line 12, in <module>
+    gen.close()
+RuntimeError: generator ignored GeneratorExit
+Raise exception from generator
+Exception ignored in: <generator object gen_function at 0x000001C0657767A0>
+RuntimeError: generator ignored GeneratorExit
+Вывод достаточно многословно говорит нам о том, что генератор проигнорировал исключение GeneratorExit, однако мы получили вывод Raise exception from generator и убедились что исключение все таки было выброшено.
+
+Генераторные выражения
+Создать генератор можно не только используя генераторную функцию, но и с помощью генераторного выражения, которое еще называют generator comprehension.
+
+gen = (v for v in range(3))
+print(f"Type gen is {type(gen)}")
+
+print(next(gen))
+print(next(gen))
+print(next(gen))
+print(next(gen))
+Type gen is <class 'generator'>
+0
+1
+2
+Traceback (most recent call last):
+  File "d:\dev\learning\common\test_3.py", line 7, in <module>
+    print(next(gen))
+StopIteration
+Обратите внимание на скобки при создании генераторного выражения. Здесь они круглые. Если бы мы использовали квадратные, то это было бы уже не генераторное выражение, а list comprehension и переменная gen была бы уже не генератором, а обычным списком.
+
+gen = [v for v in range(3)]
+print(f"Type gen is {type(gen)}")
+
+>>Type gen is <class 'list'>
+Передача значений в генератор
+Помимо получения значений из генератора мы можем прокинуть значение внутрь. Для этого у генератора существует метод send. Чтобы начать передачу значений в генератор его нужно сначала инициализировать с помощью вызова next или отправив в генератор значение None. Генератор может принимать значения только если его текущая позиция находится в yield, именно поэтому генератор нужно инициализировать чтобы его позиция перешла из начальной позиции в yield.
+Создадим генератор который умеет принимать и отдавать значения. Рассмотрим по шагам работу генератора:
+
+при вызове gen.send(None) генератор продвигается из начальной позиции до первого yield и возвращает 3. Метод send не только отправляет значение в генератор, но еще и возвращает значение из генератора. Поэтому при вызове gen.send(None) мы получили 3.
+
+генератор запоминает свою позицию.
+
+при вызове next(gen) генератор стартует с yield и выполняется до следующего yield, возвращает 2 и останавливается. Так как мы ничего не передали в генератор, то в переменной value будет значение None и мы получаем вывод Got: None.
+
+далее вызываем gen.send(55). В переменную value записывается 55 и генератор опять выполняется до следующего yield и возвращает 1.
+
+def gen_function(n):
+    while n > 0:
+        print("Before")
+        value = yield n
+        n -= 1
+        print("Got: ", value)
+        print("After")
+
+    return value
+
+
+gen = gen_function(3)
+print(gen.send(None))
+print(next(gen))
+print(gen.send(55))
+Before
+3
+Got:  None
+After
+Before
+2
+Got:  55
+After
+Before
+1
+Если мы попытаемся отправить в неинициализированный генератор значение отличное от None, то получим исключение TypeError.
+
+def gen_function(n):
+    while n > 0:
+        value = yield n
+        print("Got: ", value)
+        n -= 1
+
+    return value
+
+
+gen = gen_function(3)
+gen.send(10)
+Traceback (most recent call last):
+  File "d:\dev\learning\common\test_3.py", line 11, in <module>
+    gen.send(10)
+TypeError: can't send non-None value to a just-started generator
+Вызов next и send(None) эквивалентны и приводят к одному и тому же результату.
+
+def gen_function(n):
+    while n > 0:
+        yield n
+        n -= 1
+
+
+gen = gen_function(3)
+print(gen.send(None))
+print(gen.send(None))
+print(gen.send(None))
+
+gen = gen_function(3)
+print(next(gen))
+print(next(gen))
+print(next(gen))
+3
+2
+1
+3
+2
+1
+Передача исключений в генератор
+В генератор можно передать исключение. Для этого существует метод throw. Чтобы передать исключение генератор должен быть инициализирован вызовом next или send(None).
+
+def gen_function(n):
+    while n > 0:
+        try:
+            value = yield n
+        except Exception as e:
+            print("Got exception:", e)
+
+        n -= 1
+
+    return value
+
+gen = gen_function(3)
+next(gen)
+print(gen.throw(ValueError("Ooops")))
+Got exception: Ooops
+2
+Обратите внимание что gen.throw вернул значение 2 из генератора.
+
+Делегирование работы другим генераторам
+С помощью ключевого слова yield from можно делегировать работу другому генератору. Создадим два генератора gen и gen_2 с аргументами 3 и 5. Вызовем их в функции main. Функция main является генераторной функцией, так как в ней присутствует выражениеyield from. При вызове next, send или throw функция main делегирует работу сначала генератору gen и только после того как генератор gen завершит свою работу и отдаст все значения, начинает выполняться генератор gen_2.
+
+def gen_function(n):
+    while n > 0:
+        try:
+            value = yield n
+            print("Got value: ", value)
+        except ValueError as e:
+            print("Got exception: ", e)
+
+        n -= 1
+
+    return value
+
+gen = gen_function(3)
+gen_2 = gen_function(5)
+
+
+def main():
+    yield from gen
+    yield from gen_2
+
+main_gen = main()
+
+print(next(main_gen))
+print(main_gen.send(55))
+print(main_gen.throw(ValueError("oops")))
+
+print(next(main_gen))
+print(main_gen.send(77))
+print(main_gen.throw(ValueError("oops")))
+# Этот вывод принадлежит генератору gen
+3
+Got value:  55
+2
+Got exception:  oops
+1
+Got value:  None
+
+# А этот вывод принадлежит генератору gen_2
+5
+Got value:  77
+4
+Got exception:  oops
+3
+А что если вместо yield from использовать yield? Давайте попробуем.
+
+def gen_function(n):
+    while n > 0:
+        try:
+            value = yield n
+            print("Got value: ", value)
+        except ValueError as e:
+            print("Got exception: ", e)
+
+        n -= 1
+
+    return value
+
+gen = gen_function(3)
+gen_2 = gen_function(5)
+
+
+def main():
+    yield gen
+    yield gen_2
+
+main_gen = main()
+
+print(next(main_gen))
+print(main_gen.send(55))
+<generator object gen_function at 0x00000257589069D0>
+<generator object gen_function at 0x0000025758906D50>
+Как видите в этом случае возвращаются объекты генераторов, но не сами значения из этих генераторов. Ключевое отличие yield from от yield в том что yield from взаимодействует с генератором, запускает его, передает и получает данные из него, а yield просто возвращает объект.
+
+Примеры использования генераторов
+Генераторы можно использовать не только для создания итерируемых объектов. Область применения генераторов гораздо шире. Рассмотрим использование генератора для создания контекстного менеджера. Как правило контекстный менеджер применяется в блоке with и используется когда нужно выполнить какую-то работу до входа в блок with и при выходе из него. В примере ниже происходит открытие файла до входа в блок with и закрытие файла при выходе из блока with. Закрытие происходит неявно.
+
+with open("file.txt") as f:
+	text = f.read()
+Контекстный менеджер должен поддерживать два метода __enter__ и __exit__. При входе в блок with вызывается метод __enter__, а при выходе из него вызывается метод __exit__. Напишем собственный контекстный менеджер GeneratorContextManager. Этот контекстный менеджер принимает генераторную функцию в качестве параметра. При инициализации контекстного менеджера эта функция вызывается и создается генератор. В методе __enter__ происходит вызов функции next и генератор продвигается до первого yield возвращает значение и передает управление в вызвавший его код.
+
+from functools import wraps
+from time import time
+
+class GeneratorContextManager:
+    def __init__(self, func, args, kwargs):
+        self.gen = func(*args, **kwargs)
+
+    def __enter__(self):
+        try:
+            return next(self.gen)
+        except StopIteration:
+            raise RuntimeError("generator didn't yield") from None
+
+    def __exit__(self, typ, value, traceback):
+        try:
+            next(self.gen)
+        except StopIteration:
+            return False
+        else:
+            raise RuntimeError("generator didn't stop")
+Создадим декоратор, который принимает генераторную функцию и оборачивает ее в созданный нами контекстный менеджер.
+
+from functools import wraps
+
+def contextmanager(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return GeneratorContextManager(func, args, kwargs)
+    
+    return wrapper
+Создадим сам генератор и обернем его созданным нами декоратором. Генератор выводит время выполнения кода внутри блока with.
+
+@contextmanager
+def timed():
+    print("Before")
+    start = time()
+    try:
+        yield "some value"
+        print("After")
+    finally:
+        print(f"Time execution: {time() - start}")
+
+
+with timed() as value:
+    print(value)
+    i = 0
+    while i < 10 ** 8:
+        i += 1
+Before
+some value
+After
+Time execution: 6.822736740112305
+Разберем подробнее как работает наш контекстный менеджер.
+
+
+Собственно мы только что реализовали контекстный менеджер из библиотеки contextlib.
+
+from contextlib import contextmanager
+from time import time
+
+@contextmanager
+def timed():
+    print("Before")
+    start = time()
+    try:
+        yield 'some value'
+        print("After")
+    finally:
+        print(f'Time execution: {time() - start}')
+
+
+with timed() as value:
+    print(value)
+    i = 0
+    while i < 10 ** 8:
+        i += 1
