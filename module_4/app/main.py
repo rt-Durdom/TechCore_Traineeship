@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.exceptions import HTTPException
 
-from app.schemas.books import BookSchema
+from .schemas.books import BookSchema
+from .core.db import get_db_session, Session
 
 app = FastAPI()
 
@@ -26,3 +27,8 @@ def read_book(book_id: int):
     if book_id not in book_dict:
         raise HTTPException(status_code=404, detail='Книга не найдена')
     return f'Книга {book_dict[book_id].title}'
+
+@app.post('/books_id')
+async def create_book(book: BookSchema, db: Session = Depends(get_db_session)):
+    result = db.responce()
+    return {'mes': result}
