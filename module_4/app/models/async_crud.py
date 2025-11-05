@@ -1,6 +1,7 @@
 from typing import TypeVar
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
@@ -18,7 +19,7 @@ class CRUDAsyncBase:
                 .scalars().first())
 
     async def get(self, session: AsyncSession) -> list[ModelType]:
-        return (await session.execute(select(self.model))).scalars().all()
+        return (await session.execute(selectinload(self.model))).scalars().all()
 
     async def create(
         self,
