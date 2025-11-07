@@ -32,3 +32,7 @@ async def read_book(book_id: int, session: AsyncSession = Depends(get_session)):
 
     return await CRUDAsyncBase(Book).get_obj_by_id(book_id, session)
 
+@router.patch('/{book_id}', response_model=None)
+async def update_book(book_id: int, book: BookSchema, session: AsyncSession = Depends(get_session)):
+    data_book = await session.get(Book, book_id,)
+    return await CRUDAsyncBase(Book).update(data_book, book, session)

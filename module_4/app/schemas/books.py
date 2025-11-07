@@ -14,3 +14,4 @@ class BookDB(BaseModel):
 
 class BookRead(BookDB):
     id: int
+    author_id: int

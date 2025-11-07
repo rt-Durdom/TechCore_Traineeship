@@ -8,17 +8,9 @@ from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 
 from .base import Base
-from core.db import redis_util
+from app.core.db import redis_util
 
 ModelType = TypeVar('ModelType', bound=Base)
-
-
-async def check_cache(id: int):
-    cache_ = await redis_util.get(id)
-    if cache_:
-        return True
-    else:
-        return False
 
 
 class CRUDAsyncBase:
@@ -64,6 +56,7 @@ class CRUDAsyncBase:
         # if commit:
         await session.commit()
         await session.refresh(db_object)
+        await redis_util.delete(db_object.id)
         return db_object
 
     async def remove(
@@ -83,10 +76,13 @@ class CRUDAsyncBase:
     #TEXT = 'SELECT books.title, authors.name FROM books JOIN authors ON authors.id = books.author_id'
 
     async def get_obj_by_id(self, obj_id: int, session: AsyncSession):
-        if check_cache(obj_id):
-            return await json.loads(redis_util.get(obj_id))
-        else:
-            results = (await session.execute( #вместо select можно вставить  TEXT, но он будет только для одной модели
-                select(self.model).where(self.model.id == obj_id)
-                )).scalars().first()
-            return await redis_util.set(obj_id, json.dumps(results))
+        cache_ = await redis_util.get(obj_id)
+
+        if cache_:
+            return json.loads(cache_)
+        results = (await session.execute( #вместо select можно вставить  TEXT, но он будет только для одной модели
+            select(self.model).where(self.model.id == obj_id)
+            )).scalars().first()
+        encod_res = jsonable_encoder(results)
+        await redis_util.set(obj_id, json.dumps(encod_res))
+        return encod_res
