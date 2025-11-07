@@ -8,10 +8,10 @@ class BookSchema(BaseModel):
     year: Optional[int] = Field(default=None)
 
 
+
 class BookDB(BaseModel):
     title: str = Field(..., min_length=1)
     year: Optional[int] = Field(default=None)
 
 class BookRead(BookDB):
     id: int
-    author_id: int

@@ -9,4 +9,4 @@ class Author(Base):
     descript: Mapped[str] = mapped_column(String(100), nullable=True)
 
     #relationship
-    books: Mapped[list['Book']] = relationship('Book', back_populates='author')
+    #books: Mapped[list['Book']] = relationship('Book', back_populates='author')
