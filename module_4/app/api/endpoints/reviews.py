@@ -1,10 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import asyncio
 from typing import List
 from bson.errors import InvalidId
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.mongo_crud import ReviewService
 from app.schemas.reviews import ReviewSchema, ReviewInput
 from app.core.db import get_review_service
+from app.models.base import get_session
+from app.models.async_crud import CRUDAsyncBase
+from app.models.books import Book
 
 router = APIRouter()
 
@@ -17,12 +23,16 @@ async def create_review(
     return await review_service.create_review(review)
 
 
-@router.get("/api/products/{product_id}/reviews", response_model=List[ReviewInput])
+@router.get("/api/products/{product_id}/reviews")
 async def get_product_reviews(
     product_id: str,
-    review_service: ReviewService = Depends(get_review_service)
+    review_service: ReviewService = Depends(get_review_service),
+    session: AsyncSession = Depends(get_session)
 ):
-    return await review_service.get_reviews_id(product_id)
+    book_task = CRUDAsyncBase(Book).get_obj_by_id(product_id, session)
+    reviews_task = review_service.get_reviews_id(product_id)
+    reviews = await asyncio.gather(book_task, reviews_task)
+    return reviews
 
 
 @router.get("/api/reviews/{review_id}", response_model=ReviewInput)
