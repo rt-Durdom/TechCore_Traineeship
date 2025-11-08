@@ -57,6 +57,7 @@ class CRUDAsyncBase:
         await session.commit()
         await session.refresh(db_object)
         await redis_util.delete(db_object.id)
+        await redis_util.publish('cache:invalidate', db_object.id)
         return db_object
 
     async def remove(
