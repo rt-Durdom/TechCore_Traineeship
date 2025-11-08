@@ -30,13 +30,14 @@ class CRUDAsyncBase:
         session: AsyncSession,
         # commit: bool = True
     ):
-        object_data = object_in.dict()
-        db_object = self.model(**object_data)
-        session.add(db_object)
-        # if commit:
-        await session.commit()
-        await session.refresh(db_object)
-        return db_object
+        async with redis_util.lock(f'Ключ блокировки: {self.model.__name__}', timeout=10, blocking_timeout=5):
+            object_data = object_in.dict()
+            db_object = self.model(**object_data)
+            session.add(db_object)
+            # if commit:
+            await session.commit()
+            await session.refresh(db_object)
+            return db_object
 
     async def update(
             self,
