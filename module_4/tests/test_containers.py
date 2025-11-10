@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from testcontainers.postgres import PostgresContainer
 from module_4.app.main import app
 
-from module_4.app.core.db import get_db_session
+from module_4.app.models.base import get_session
 from module_4.app.models import Base, Book
 
 
@@ -29,7 +29,7 @@ async def test_e2e_real_db_async():
             session.add(book)
             await session.commit()
 
-        app.dependency_overrides[get_db_session] = lambda: session_maker()
+        app.dependency_overrides[get_session] = lambda: session_maker()
 
         try:
             async with AsyncClient(
