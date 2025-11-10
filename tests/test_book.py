@@ -42,3 +42,11 @@ def test_get_book_endpoint_sesion():
         assert response.status_code == 200
     finally:
         app.dependency_overrides.clear()
+
+
+def test_post_book_pydantic():
+    response = fast_test_client.post(
+        '/books/books',
+        json={'title': 123, 'author': "Пушукин", 'year': 1812}
+    )
+    assert response.status_code == 422
