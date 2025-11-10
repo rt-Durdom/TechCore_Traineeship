@@ -11,7 +11,7 @@ from .base import Base
 ModelType = TypeVar('ModelType', bound=Base)
 
 class CRUDAsyncBase:
-     def __init__(self, model):
+    def __init__(self, model):
         self.model = model
 
     async def retrive(self, obj_id: int, session: AsyncSession):
@@ -69,9 +69,9 @@ class CRUDAsyncBase:
         await session.commit()
         return db_obj
 
-    TEXT = 'SELECT books.title, authors.name FROM books JOIN authors ON authors.id = books.author_id'
+    #TEXT = 'SELECT books.title, authors.name FROM books JOIN authors ON authors.id = books.author_id'
 
     async def get_obj_by_id(self, obj_id: int, session: AsyncSession):
-        return (await session.execute( #вместо select можно вставить  TEXT, но он будет только для одной модели
+        return (await session.execute(
             select(self.model).where(self.model.id == obj_id)
             )).scalars().first()
