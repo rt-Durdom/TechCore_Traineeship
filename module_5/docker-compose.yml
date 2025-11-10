@@ -12,4 +12,34 @@ services:
     volumes:
       - "./pgdata:/var/lib/postgresql/data/pgdata"
     restart: unless-stopped
+
+  redis_db:
+    image: redis:alpine
+    container_name: redis_db
+    ports:
+      - 6379:6379
+    env_file:
+       - ./.env
+    restart: unless-stopped
+
+  mongo_db:
+    image: mongo:latest
+    container_name: mongo_db
+    ports:
+      - 27017:27017
+    env_file:
+       - ./.env
+    volumes:
+      - mongodata:/data/db
+    restart: unless-stopped
+
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+  mongodata:
+    driver: local
+  
     

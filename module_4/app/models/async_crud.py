@@ -1,3 +1,4 @@
+import json
 from typing import TypeVar
 
 from sqlalchemy import select
@@ -7,11 +8,13 @@ from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 
 from .base import Base
+from app.core.db import redis_util
 
 ModelType = TypeVar('ModelType', bound=Base)
 
+
 class CRUDAsyncBase:
-     def __init__(self, model):
+    def __init__(self, model):
         self.model = model
 
     async def retrive(self, obj_id: int, session: AsyncSession):
@@ -19,7 +22,7 @@ class CRUDAsyncBase:
                 .scalars().first())
 
     async def get(self, session: AsyncSession) -> list[ModelType]:
-        return (await session.execute(selectinload(self.model))).scalars().all()
+        return (await session.execute(select(self.model))).scalars().all()
 
     async def create(
         self,
@@ -27,13 +30,14 @@ class CRUDAsyncBase:
         session: AsyncSession,
         # commit: bool = True
     ):
-        object_data = object_in.dict()
-        db_object = self.model(**object_data)
-        session.add(db_object)
-        # if commit:
-        await session.commit()
-        await session.refresh(db_object)
-        return db_object
+        async with redis_util.lock(f'Ключ блокировки: {self.model.__name__}', timeout=10, blocking_timeout=5):
+            object_data = object_in.dict()
+            db_object = self.model(**object_data)
+            session.add(db_object)
+            # if commit:
+            await session.commit()
+            await session.refresh(db_object)
+            return db_object
 
     async def update(
             self,
@@ -53,6 +57,8 @@ class CRUDAsyncBase:
         # if commit:
         await session.commit()
         await session.refresh(db_object)
+        await redis_util.delete(db_object.id)
+        await redis_util.publish('cache:invalidate', db_object.id)
         return db_object
 
     async def remove(
@@ -69,9 +75,16 @@ class CRUDAsyncBase:
         await session.commit()
         return db_obj
 
-    TEXT = 'SELECT books.title, authors.name FROM books JOIN authors ON authors.id = books.author_id'
+    #TEXT = 'SELECT books.title, authors.name FROM books JOIN authors ON authors.id = books.author_id'
 
     async def get_obj_by_id(self, obj_id: int, session: AsyncSession):
-        return (await session.execute( #вместо select можно вставить  TEXT, но он будет только для одной модели
+        cache_ = await redis_util.get(obj_id)
+
+        if cache_:
+            return json.loads(cache_)
+        results = (await session.execute( #вместо select можно вставить  TEXT, но он будет только для одной модели
             select(self.model).where(self.model.id == obj_id)
             )).scalars().first()
+        encod_res = jsonable_encoder(results)
+        await redis_util.set(obj_id, json.dumps(encod_res))
+        return encod_res
