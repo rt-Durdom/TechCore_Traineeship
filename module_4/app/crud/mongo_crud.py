@@ -20,7 +20,7 @@ class ReviewService:
             **review_data
         )
 
-    async def get_reviews_id(self, product_id: str):
+    async def get_for_product(self, product_id: str):
         messages = self.collection.find({"product_id": product_id})
         reviews = []
 

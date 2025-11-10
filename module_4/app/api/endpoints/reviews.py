@@ -23,21 +23,21 @@ async def create_review(
     return await review_service.create_review(review)
 
 
-@router.get("/api/products/{product_id}/reviews")
+@router.get("/api/products/{product_id}/details")
 async def get_product_reviews(
-    product_id: str,
+    product_id: int,
     review_service: ReviewService = Depends(get_review_service),
     session: AsyncSession = Depends(get_session)
 ):
     book_task = CRUDAsyncBase(Book).get_obj_by_id(product_id, session)
-    reviews_task = review_service.get_reviews_id(product_id)
-    reviews = await asyncio.gather(book_task, reviews_task)
-    return reviews
+    reviews_task = review_service.get_for_product(product_id)
+    book,reviews = await asyncio.gather(book_task, reviews_task)
+    return f'Букс: {book}, Отзывс: {reviews}'
 
 
 @router.get("/api/reviews/{review_id}", response_model=ReviewInput)
 async def get_review(
-    review_id: str,
+    review_id: int,
     review_service: ReviewService = Depends(get_review_service)
 ):
     try:
@@ -62,7 +62,7 @@ async def get_review(
 
 @router.delete("/api/reviews/{review_id}")
 async def delete_review(
-    review_id: str,
+    review_id: int,
     review_service: ReviewService = Depends(get_review_service)
 ):
     try:

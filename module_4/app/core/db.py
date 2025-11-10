@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv('module_5/.env')
 
-redis_util = redis.asyncio.Redis(host='localhost', port=6379, db=0)
+redis_util = redis.asyncio.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
 
 async def get_review_service() -> ReviewService:
