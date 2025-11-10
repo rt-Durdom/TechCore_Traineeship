@@ -1,3 +1,9 @@
+TEXT = 'SELECT 1'
+
+def test_db_session(db_session):
+    result = db_session.execute(TEXT).scalar()
+    assert result == 1
+
 def multi(a, b):
     return a * b
 
