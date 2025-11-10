@@ -1,4 +1,5 @@
 import pytest
+import httpx
 from unittest.mock import AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,7 +32,7 @@ async def test_mock_get_book(mocker):
 
 
 def test_get_book_endpoint():
-    response = fast_test_client.get('/books/books')
+    response = fast_test_client.get('/books')
     assert response.status_code == 200
 
 
@@ -39,7 +40,7 @@ def test_get_book_endpoint_sesion():
     mock_session = AsyncMock(spec=AsyncSession)
     app.dependency_overrides[get_db_session] = lambda: mock_session
     try:
-        response = fast_test_client.get("/books/books")
+        response = fast_test_client.get('/books')
         assert response.status_code == 200
     finally:
         app.dependency_overrides.clear()
@@ -51,3 +52,11 @@ def test_post_book_pydantic():
         json={'title': 123, 'author': "Пушукин", 'year': 1812}
     )
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_async_get_book():
+    async with httpx.AsyncClient(app=app, base_url="http://test") as client:
+        response = await client.get('/books')
+
+    assert response.status_code == 200
