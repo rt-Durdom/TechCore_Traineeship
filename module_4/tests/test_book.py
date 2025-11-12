@@ -1,5 +1,6 @@
 import pytest
 import httpx
+from httpx import AsyncClient, ASGITransport
 from unittest.mock import AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -36,19 +37,27 @@ def test_get_book_endpoint():
     assert response.status_code == 200
 
 
-def test_get_book_endpoint_sesion():
-    mock_session = AsyncMock(spec=AsyncSession)
-    app.dependency_overrides[get_session] = lambda: mock_session
-    try:
-        response = fast_test_client.get('/books')
-        assert response.status_code == 200
-    finally:
-        app.dependency_overrides.clear()
+@pytest.mark.asyncio
+async def test_get_book_endpoint_session(mocker):
+    async def fake_db_session():
+        yield AsyncMock()
+    app.dependency_overrides[get_session] = fake_db_session
+    mocker.patch(
+        'app.api.endpoints.books.CRUDAsyncBase.get_obj_by_id',
+        AsyncMock(return_value={'id': 1, 'title': 'Книга',
+                                'year': 2025, 'author': 'Автор'})
+    )
+    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as ac:
+        response = await ac.get('/books/1')
+
+    assert response.status_code == 200
+
+    app.dependency_overrides.clear()
 
 
 def test_post_book_pydantic():
     response = fast_test_client.post(
-        '/books/books_id',
+        '/books.',
         json={'title': 123, 'author': "Пушукин", 'year': 1812}
     )
     assert response.status_code == 422
@@ -56,7 +65,7 @@ def test_post_book_pydantic():
 
 @pytest.mark.asyncio
 async def test_async_get_book():
-    async with httpx.AsyncClient(app=app, base_url="http://test") as client:
+    async with httpx.AsyncClient(app=app, base_url='http://tests') as client:
         response = await client.get('/books')
 
     assert response.status_code == 200

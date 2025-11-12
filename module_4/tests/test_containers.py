@@ -34,7 +34,7 @@ async def test_e2e_real_db_async():
         try:
             async with AsyncClient(
                 transport=ASGITransport(app=app),
-                base_url="http://test"
+                base_url="http://tests"
             ) as ac:
                 response = await ac.get('/books')
                 assert response.status_code == 200
