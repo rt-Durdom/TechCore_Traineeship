@@ -78,11 +78,7 @@ class CRUDAsyncBase:
     #TEXT = 'SELECT books.title, authors.name FROM books JOIN authors ON authors.id = books.author_id'
 
     async def get_obj_by_id(self, obj_id: int, session: AsyncSession):
-        cache_ = await redis_util.get(obj_id)
-
-        if cache_:
-            return json.loads(cache_)
-        results = (await session.execute( #вместо select можно вставить  TEXT, но он будет только для одной модели
+        return (await session.execute( 
             select(self.model).where(self.model.id == obj_id)
             )).scalars().first()
         encod_res = jsonable_encoder(results)
