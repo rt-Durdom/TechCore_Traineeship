@@ -11,7 +11,7 @@ from app.core.invalidator import in_invalidator
 app = FastAPI()
 
 
-@app.event('startup')
+@app.on_event('startup')
 async def startup_event():
     asyncio.create_task(in_invalidator.listen_for_invalidation())
 
