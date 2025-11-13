@@ -1,4 +1,5 @@
 import asyncio
+import aiohttp
 import backoff
 import httpx
 import pybreaker
@@ -46,3 +47,16 @@ class AuthorService:
             raise Exception(f'Что-то пошло не так {e}')
         finally:
             await self.client.aclose()
+
+    async def get_aiohttp_client(self, id: int):
+        try:
+            async with aiohttp.ClientSession() as aio_client:
+                response = await asyncio.wait_for(
+                        aio_client.get(f'{self.base_url}/authors/{id}'),
+                        timeout=2.0
+                )
+                return response
+        except asyncio.TimeoutError as te:
+            raise TimeoutError(f'Время ожидания истекл. Ошибка {te}')
+        except Exception as e:
+            raise Exception(f'Что-то пошло не так {e}')
