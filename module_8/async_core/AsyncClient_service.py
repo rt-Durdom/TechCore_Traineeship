@@ -17,17 +17,27 @@ class AuthorService:
         self.base_url = base_url
         self.client = httpx.AsyncClient()
         self.circuit_breaker = pybreaker.CircuitBreaker(fail_max=5)
+        self.semaphore = asyncio.Semaphore(5)
+
 
     @backoff.on_exception(backoff.expo, httpx.RequestError, max_tries=3)
     async def get_data(self, id: int):
 
         try:
-            response = await asyncio.wait_for(
-                self.circuit_breaker.call_async(
-                    self.client.get, f'{self.base_url}/{id}'
-                ), timeout=2.0
-            )
-            return response
+            async with self.semaphore:
+                task1 = await asyncio.wait_for(
+                    self.circuit_breaker.call_async(
+                        self.client.get, f'{self.base_url}/authors/{id}'
+                    ), timeout=2.0
+                )
+                task2 = await asyncio.wait_for(
+                    self.circuit_breaker.call_async(
+                        self.client.get, f'{self.base_url}/api/reviews/{id}'
+                    ), timeout=2.0
+                )
+                responses = await asyncio.gather(task1, task2)
+
+                return *responses
         except asyncio.TimeoutError as te:
             raise TimeoutError(f'Время ожидания истекл. Ошибка {te}')
         except pybreaker.CircuitBreakerError:
