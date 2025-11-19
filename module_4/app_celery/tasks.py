@@ -3,7 +3,7 @@ import time
 from .new_app_celery import celery_app
 
 
-@celery_app.task
+@celery_app.task(name='module_4.app_celery.process_order')
 def process_order(order_id):
     time.sleep(10)
     return order_id
