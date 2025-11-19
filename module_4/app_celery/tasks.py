@@ -1,6 +1,6 @@
 import time
 
-from new_app_celery import celery_app
+from .new_app_celery import celery_app
 
 
 @celery_app.task
