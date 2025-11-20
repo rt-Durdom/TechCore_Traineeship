@@ -47,19 +47,37 @@ services:
       - rabbitmq-data:/var/lib/rabbitmq
 
   celery-worker:
-    build: ..
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: celery_worker
     command: python -m celery -A module_4.app_celery.new_app_celery worker --loglevel=info
     depends_on:
       - rabbitmq
       - redis_db
     volumes:
-      - "../module_4:/app/module_4"
+      - "./module_4:/app/module_4"
     working_dir: /app
     environment:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
       - CELERY_RESULT_BACKEND=redis://redis_db:6379/0
       - PYTHONPATH=/app
+    restart: unless-stopped
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: module_4/app_celery/Dockerfile.schedule
+    container_name: celery_beat
+    command: python -m celery -A module_4.app_celery.new_app_celery beat --loglevel=info
+    depends_on:
+      - redis_db
+      - rabbitmq
+      - celery-worker
+    environment:
+      - PYTHONPATH=/app
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis_db:6379/0
     restart: unless-stopped
 
 
