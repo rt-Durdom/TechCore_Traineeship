@@ -9,4 +9,6 @@
     python cel_main.py #терминал 2 - вызов задачи
 - для запуска веб сервера:
     uvicorn main:app --reload
+- для запуска flower:
+    celery -A new_app_celery flower
 
