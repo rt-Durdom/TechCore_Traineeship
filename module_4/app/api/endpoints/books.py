@@ -1,12 +1,14 @@
 import asyncio
+from fastapi.encoders import jsonable_encoder
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.books import BookSchema, BookDB, BookRead
+from app.schemas.books import BookSchema, BookDB, BookRead, AuthorShema
 from app.models.async_crud import CRUDAsyncBase
 from app.models.base import get_session
 from app.models.books import Book
+from module_8.async_core.AsyncClient_service import AuthorService, get_author_service
 
 router = APIRouter()
 # book_dict = dict()
@@ -28,9 +30,18 @@ async def read_books(session: AsyncSession = Depends(get_session)):
     return await CRUDAsyncBase(Book).get(session)
 
 @router.get('/{book_id}', response_model=BookRead)
-async def read_book(book_id: int, session: AsyncSession = Depends(get_session)):
+async def read_book(
+    book_id: int, 
+    session: AsyncSession = Depends(get_session),
+    service_author: AuthorService = Depends(get_author_service)
+):
+    book_info = await CRUDAsyncBase(Book).get_obj_by_id(book_id, session)
+    author_info = await service_author.get_data(book_info.author_id)
 
-    return await CRUDAsyncBase(Book).get_obj_by_id(book_id, session)
+    return BookDB(
+        **jsonable_encoder(book_info),
+        author=AuthorSchema(**author_info)
+    )
 
 @router.patch('/{book_id}', response_model=None)
 async def update_book(book_id: int, book: BookSchema, session: AsyncSession = Depends(get_session)):

@@ -18,8 +18,10 @@ class CRUDAsyncBase:
         self.model = model
 
     async def retrive(self, obj_id: int, session: AsyncSession):
-        return (await session.execute(select(self.model).where(self.model.id == obj_id))
-                .scalars().first())
+        result = await session.execute(
+            select(self.model).where(self.model.id == obj_id)
+        )
+        return result.scalars().first()
 
     async def get(self, session: AsyncSession) -> list[ModelType]:
         return (await session.execute(select(self.model))).scalars().all()
@@ -81,6 +83,6 @@ class CRUDAsyncBase:
         return (await session.execute( 
             select(self.model).where(self.model.id == obj_id)
             )).scalars().first()
-        encod_res = jsonable_encoder(results)
-        await redis_util.set(obj_id, json.dumps(encod_res))
-        return encod_res
+        # encod_res = jsonable_encoder(results)
+        # await redis_util.set(obj_id, json.dumps(encod_res))
+        # return encod_res
