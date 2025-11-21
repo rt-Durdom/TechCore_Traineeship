@@ -12,3 +12,10 @@
 - для запуска flower:
     celery -A new_app_celery flower
 
+- находясь в папке app (сруктура app/grpc/...) выполняется команда на компиляцию grpc файлов.
+python -m grpc_tools.protoc \
+    -I grpc \
+    --python_out=grpc \
+    --grpc_python_out=grpc \
+    grpc/book.proto
+
