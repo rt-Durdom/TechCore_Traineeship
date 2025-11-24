@@ -1,7 +1,7 @@
 from confluent_kafka import Producer
 
 
-config_kafka = {'bootstrap.servers': 'localhost:9092',
+config_kafka = {'bootstrap.servers': 'kafka1:9092',
                 'client.id': 'test-producer-1'}
 
 producer = Producer(config_kafka)
