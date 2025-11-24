@@ -1,8 +1,10 @@
 import sys
+import json
 
 from confluent_kafka import Consumer
 from confluent_kafka.cimpl import KafkaError
 from confluent_kafka.error import KafkaException
+from pymongo import MongoClient
 
 
 class AnalyticsWorker:
@@ -12,11 +14,16 @@ class AnalyticsWorker:
             'group.id': 'analytics',
             'auto.offset.reset': 'earliest'
         })
+        self.client_mongo = MongoClient('mongodb://admin:admin123@mongo_db:27017/?authSource=admin')
+        self.db = self.client_mongo['analytics']
+        self.collection = self.db['events_book']
+
 
     def start_consume_loop(self):
+
+
         try:
             self.consumer.subscribe(['book_views'])
-
             while True:
                 msg = self.consumer.poll(timeout=1.0)
                 if msg is None:
@@ -29,8 +36,12 @@ class AnalyticsWorker:
                                          (msg.topic(), msg.partition(), msg.offset()))
                     elif msg.error():
                         raise KafkaException(msg.error())
+                
                 else:
                     print(msg)
+                    data = json.loads(msg.value())
+                    self.collection.insert_one(data)
+                    print(f'Добавили в базу: {data}')
                     self.consumer.commit(asynchronous=True)
 
         finally:
@@ -39,3 +50,6 @@ class AnalyticsWorker:
 
 
 consumer = AnalyticsWorker()
+
+if __name__ == '__main__':
+    consumer.start_consume_loop()
