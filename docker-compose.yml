@@ -145,6 +145,17 @@ services:
     environment:
       - PYTHONPATH=/app/module_4 
     restart: unless-stopped
+  
+  faust-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m module_4.app_kafka.app_faust
+    depends_on:
+      - kafka1
+    environment:
+      - PYTHONPATH=/app/module_4
+    restart: unless-stopped
 
 volumes:
   pgdata:
