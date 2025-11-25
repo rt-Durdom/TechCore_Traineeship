@@ -133,7 +133,18 @@ services:
     environment:
       - PYTHONPATH=/app/module_4 
     restart: unless-stopped
-      
+  
+  analytics-worker-async:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m module_4.app_kafka.async_consumer
+    depends_on:
+      - kafka1
+      - mongo_db
+    environment:
+      - PYTHONPATH=/app/module_4 
+    restart: unless-stopped
 
 volumes:
   pgdata:
