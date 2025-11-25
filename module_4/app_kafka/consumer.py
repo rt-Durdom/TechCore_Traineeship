@@ -18,10 +18,7 @@ class AnalyticsWorker:
         self.db = self.client_mongo['analytics']
         self.collection = self.db['events_book']
 
-
     def start_consume_loop(self):
-
-
         try:
             self.consumer.subscribe(['book_views'])
             while True:
@@ -39,10 +36,16 @@ class AnalyticsWorker:
                 
                 else:
                     print(msg)
-                    data = json.loads(msg.value())
-                    self.collection.insert_one(data)
-                    print(f'Добавили в базу: {data}')
-                    self.consumer.commit(asynchronous=True)
+                    raw_msg = msg.value()
+                    if raw_msg:
+                        data = json.loads(raw_msg)
+                        self.collection.insert_one(data)
+                        print(f'Добавили в базу: {data}')
+                        print(f'Было использовано {msg.partition()}')
+                        self.consumer.commit(asynchronous=True)
+                    else:
+                        continue  # пропускаем пустые сообщения
+                    
 
         finally:
             # Close down consumer to commit final offsets.

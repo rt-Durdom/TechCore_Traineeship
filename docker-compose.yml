@@ -116,10 +116,23 @@ services:
       - "9092:9092"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_HOST_NAME: kafka1
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
     depends_on:
       - zookeeper
+  
+  analytics-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m module_4.app_kafka.consumer
+    depends_on:
+      - kafka1
+      - mongo_db
+    environment:
+      - PYTHONPATH=/app/module_4 
+    restart: unless-stopped
       
 
 volumes:
