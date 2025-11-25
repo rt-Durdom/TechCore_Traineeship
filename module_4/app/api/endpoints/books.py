@@ -1,6 +1,6 @@
 import asyncio
 from fastapi.encoders import jsonable_encoder
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,6 +9,7 @@ from app.models.async_crud import CRUDAsyncBase
 from app.models.base import get_session
 from app.models.books import Book
 from module_8.async_core.AsyncClient_service import AuthorService, get_author_service
+from app_kafka.utils_kafka import send_event_book
 
 router = APIRouter()
 # book_dict = dict()
@@ -31,12 +32,19 @@ async def read_books(session: AsyncSession = Depends(get_session)):
 
 @router.get('/{book_id}', response_model=BookRead)
 async def read_book(
-    book_id: int, 
+    book_id: int,
+    background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
-    service_author: AuthorService = Depends(get_author_service)
+    service_author: AuthorService = Depends(get_author_service),
 ):
     book_info = await CRUDAsyncBase(Book).get_obj_by_id(book_id, session)
     author_info = await service_author.get_data(book_info.author_id)
+    background_tasks.add_task(
+        asyncio.to_thread,
+        send_event_book,
+        book_id,
+        book_info.title,
+    )
 
     return BookDB(
         **jsonable_encoder(book_info),

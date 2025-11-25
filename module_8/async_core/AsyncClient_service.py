@@ -38,7 +38,7 @@ class AuthorService:
                 )
                 responses = await asyncio.gather(task1, task2)
 
-                return *responses
+                return responses
         except asyncio.TimeoutError as te:
             raise TimeoutError(f'Время ожидания истекл. Ошибка {te}')
         except pybreaker.CircuitBreakerError:
