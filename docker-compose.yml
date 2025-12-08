@@ -1,5 +1,31 @@
 name: techcore
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    container_name: app
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env
+    volumes:
+      - "./module_4:/app/module_4"
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - db
+      - redis_db
+      - mongo_db
+      - rabbitmq
+      - celery-worker
+      - celery-beat
+      - flower
+      - zookeeper
+      - kafka1
+    restart: unless-stopped
+
   db:
     image: postgres:17-alpine
     container_name: postgres_db
@@ -49,7 +75,7 @@ services:
   celery-worker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.celery
     container_name: celery_worker
     command: python -m celery -A module_4.app_celery.new_app_celery worker --loglevel=info
     depends_on:
