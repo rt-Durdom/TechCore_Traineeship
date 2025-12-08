@@ -10,9 +10,9 @@ router_gateway = APIRouter()
 async def books():
     return {'status": "ok'}
 
-BOOK_SERVICE_URL = os.getenv('http://book-service:8000')
+BOOK_SERVICE_URL = os.getenv('BOOK_SERVICE_URL', 'http://book-service:8000')
 
-@router_gateway.get('/books/{book_id}')
+@router_gateway.get('/{book_id}')
 async def proxy_book(book_id: int):
     url = f'{BOOK_SERVICE_URL}/api/books/{book_id}'
     try:

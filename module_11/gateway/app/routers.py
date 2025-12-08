@@ -6,5 +6,5 @@ api_router_gateway = APIRouter()
 
 api_router_gateway.include_router(
     router_gateway,
-    prefix='/books',
+    prefix='/api/books',
     tags=['books'],)
