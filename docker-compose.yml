@@ -1,10 +1,10 @@
 name: techcore
 services:
-  app:
+  book-service:
     build:
       context: .
       dockerfile: Dockerfile.app
-    container_name: app
+    container_name: book-service
     ports:
       - 8000:8000
     env_file:
