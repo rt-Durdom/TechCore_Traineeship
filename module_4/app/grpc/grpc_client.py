@@ -1,6 +1,6 @@
 import asyncio
 import grpc
-from app.grpc import book_pb2, book_pb2_grpc
+from module_4.app.grpc import book_pb2, book_pb2_grpc
 
 
 async def run():

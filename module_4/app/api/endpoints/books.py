@@ -4,12 +4,12 @@ from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.books import BookSchema, BookDB, BookRead, AuthorShema
-from app.models.async_crud import CRUDAsyncBase
-from app.models.base import get_session
-from app.models.books import Book
-from module_8.async_core.AsyncClient_service import AuthorService, get_author_service
-from app_kafka.utils_kafka import send_event_book
+from module_4.app.schemas.books import BookSchema, BookDB, BookRead #, AuthorShema
+from module_4.app.models.async_crud import CRUDAsyncBase
+from module_4.app.models.base import get_session
+from module_4.app.models.books import Book
+# from module_8.async_core.AsyncClient_service import AuthorService, get_author_service
+from module_4.app_kafka.utils_kafka import send_event_book
 
 router = APIRouter()
 # book_dict = dict()
@@ -35,10 +35,10 @@ async def read_book(
     book_id: int,
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
-    service_author: AuthorService = Depends(get_author_service),
+    #service_author: AuthorService = Depends(get_author_service),
 ):
     book_info = await CRUDAsyncBase(Book).get_obj_by_id(book_id, session)
-    author_info = await service_author.get_data(book_info.author_id)
+    #author_info = await service_author.get_data(book_info.author_id)
     background_tasks.add_task(
         asyncio.to_thread,
         send_event_book,
@@ -48,7 +48,7 @@ async def read_book(
 
     return BookDB(
         **jsonable_encoder(book_info),
-        author=AuthorSchema(**author_info)
+        #author=AuthorSchema(**author_info)
     )
 
 @router.patch('/{book_id}', response_model=None)

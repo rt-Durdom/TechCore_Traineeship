@@ -5,12 +5,12 @@ from bson.errors import InvalidId
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.mongo_crud import ReviewService
-from app.schemas.reviews import ReviewSchema, ReviewInput
-from app.core.db import get_review_service
-from app.models.base import get_session
-from app.models.async_crud import CRUDAsyncBase
-from app.models.books import Book
+from module_4.app.crud.mongo_crud import ReviewService
+from module_4.app.schemas.reviews import ReviewSchema, ReviewInput
+from module_4.app.core.db import get_review_service
+from module_4.app.models.base import get_session
+from module_4.app.models.async_crud import CRUDAsyncBase
+from module_4.app.models.books import Book
 
 router = APIRouter()
 

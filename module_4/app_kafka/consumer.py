@@ -13,7 +13,7 @@ class AnalyticsWorker:
             'bootstrap.servers': 'kafka1:9092',
             'group.id': 'analytics',
             'auto.offset.reset': 'earliest',
-            'enable.auto.commit'=False,
+            'enable.auto.commit': False,
         })
         self.client_mongo = MongoClient('mongodb://admin:admin123@mongo_db:27017/?authSource=admin')
         self.db = self.client_mongo['analytics']
@@ -55,5 +55,5 @@ class AnalyticsWorker:
 
 consumer = AnalyticsWorker()
 
-if __name__ == '__main__':
-    consumer.start_consume_loop()
+# if __name__ == '__main__':
+#     consumer.start_consume_loop()

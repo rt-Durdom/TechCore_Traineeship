@@ -2,7 +2,7 @@ import redis
 import os
 
 from motor.motor_asyncio import AsyncIOMotorClient
-from app.crud.mongo_crud import ReviewService
+from module_4.app.crud.mongo_crud import ReviewService
 from dotenv import load_dotenv
 
 

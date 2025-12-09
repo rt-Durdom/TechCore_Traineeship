@@ -2,7 +2,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 from datetime import datetime
 
-from app.schemas.reviews import ReviewSchema, ReviewInput
+from module_4.app.schemas.reviews import ReviewSchema, ReviewInput
 
 
 class ReviewService:
