@@ -1,9 +1,10 @@
 import os
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
-
 from pydantic import BaseModel
+
+from gateway.app.api.auth_jwt import verify_jwt
 
 
 router_gateway = APIRouter()
@@ -22,7 +23,7 @@ async def books():
 BOOK_SERVICE_URL = os.getenv('BOOK_SERVICE_URL', 'http://book-service:8000')
 
 @router_gateway.get('/{book_id}')
-async def proxy_book(book_id: int):
+async def proxy_book(book_id: int, user=Depends(verify_jwt)):
     url = f'{BOOK_SERVICE_URL}/api/books/{book_id}'
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
@@ -39,7 +40,7 @@ async def proxy_book(book_id: int):
 
 
 @router_gateway.post('')
-async def create_book(book: BookCreate):
+async def create_book(book: BookCreate, user=Depends(verify_jwt)):
     url = f'{BOOK_SERVICE_URL}/api/books/'
 
     try:

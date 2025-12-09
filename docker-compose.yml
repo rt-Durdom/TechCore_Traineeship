@@ -31,6 +31,8 @@ services:
       context: .
       dockerfile: Dockerfile.gateway
     container_name: gateway
+    env_file:
+      - ./.env
     depends_on:
       - book-service
     ports:
