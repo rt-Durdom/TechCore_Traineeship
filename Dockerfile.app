@@ -23,6 +23,9 @@ COPY module_4/app_kafka ./module_4/app_kafka
 
 COPY module_4/app_celery ./module_4/app_celery
 
+COPY alembic.ini ./
+COPY alembic ./alembic
+
 EXPOSE 8000
 
 CMD ["uvicorn", "module_4.app.main:app", "--host", "0.0.0.0", "--port", "8000"]

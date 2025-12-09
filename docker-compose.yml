@@ -13,7 +13,7 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
-    restart: unless-stopped
+    restart: unless-stoppde
 
   book-service:
     build:
@@ -29,6 +29,7 @@ services:
     working_dir: /app
     environment:
       - PYTHONPATH=/app
+      - POSTGRES_SERVER=db
     labels:                                                     
       - "traefik.enable=true"
       - "traefik.http.routers.book-service.rule=Host(`book.local`) || PathPrefix(`/api/books`)"
