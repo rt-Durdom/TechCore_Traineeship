@@ -2,8 +2,14 @@ import os
 from fastapi import Header, HTTPException
 import jwt
 
+ROLE = os.getenv('ROLE', 'user').split(',')
 JWT_SECRET = os.getenv('JWT_SECRET')
 JWT_ALG = os.getenv('JWT_ALGORITHM', 'HS256')
+
+
+def verify_role(role: str):
+    if role not in ROLE:
+        raise HTTPException(status_code=403, detail='Нет такого пользователя')
 
 
 async def verify_jwt(authorization: str | None = Header(None)):
@@ -14,4 +20,5 @@ async def verify_jwt(authorization: str | None = Header(None)):
         decode_jwt = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail='Ошибка с токеном')
+    verify_role(decode_jwt.get('role'))
     return decode_jwt
