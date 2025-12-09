@@ -32,7 +32,7 @@ async def get_product_reviews(
     book_task = CRUDAsyncBase(Book).get_obj_by_id(product_id, session)
     reviews_task = review_service.get_for_product(product_id)
     book,reviews = await asyncio.gather(book_task, reviews_task)
-    return f'Букс: {book}, Отзывс: {reviews}'
+    return {'Букс': {book}, 'Отзывс': {reviews}}
 
 
 @router.get("/api/reviews/{review_id}", response_model=ReviewInput)

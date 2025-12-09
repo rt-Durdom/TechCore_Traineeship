@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 
-load_dotenv('module_5/.env')
+load_dotenv('.env')
 
 
 async def motor_goooo():
