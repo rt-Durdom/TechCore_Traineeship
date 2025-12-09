@@ -14,7 +14,7 @@ class PreBase:
 
 Base = declarative_base(cls=PreBase)
 
-db_url = 'postgresql+asyncpg://techcore:techcore@localhost:5432/techcore'
+db_url = 'postgresql+asyncpg://techcore:techcore@db:5432/techcore'
 
 engine = create_async_engine(db_url)
 

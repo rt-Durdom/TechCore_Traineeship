@@ -1,5 +1,20 @@
 name: techcore
 services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    restart: unless-stopped
+
   book-service:
     build:
       context: .
@@ -14,6 +29,11 @@ services:
     working_dir: /app
     environment:
       - PYTHONPATH=/app
+    labels:                                                     
+      - "traefik.enable=true"
+      - "traefik.http.routers.book-service.rule=Host(`book.local`) || PathPrefix(`/api/books`)"
+      - "traefik.http.routers.book-service.entrypoints=web"
+      - "traefik.http.services.book-service.loadbalancer.server.port=8000"
     depends_on:
       - db
       - redis_db
@@ -26,21 +46,21 @@ services:
       - kafka1
     restart: unless-stopped
 
-  gateway:
-    build:
-      context: .
-      dockerfile: Dockerfile.gateway
-    container_name: gateway
-    env_file:
-      - ./.env
-    depends_on:
-      - book-service
-    ports:
-      - 8080:8080
-    environment:
-      - BOOK_SERVICE_URL=http://book-service:8000
-      - PYTHONPATH=/app/module_11
-    restart: unless-stopped
+  # gateway:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.gateway
+  #   container_name: gateway
+  #   env_file:
+  #     - ./.env
+  #   depends_on:
+  #     - book-service
+  #   ports:
+  #     - 8080:8080
+  #   environment:
+  #     - BOOK_SERVICE_URL=http://book-service:8000
+  #     - PYTHONPATH=/app/module_11
+  #   restart: unless-stopped
 
   db:
     image: postgres:17-alpine
