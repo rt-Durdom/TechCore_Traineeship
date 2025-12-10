@@ -13,7 +13,7 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
-    restart: unless-stoppde
+    restart: unless-stopped
 
   book-service:
     build:
