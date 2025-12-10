@@ -19,3 +19,7 @@ python -m grpc_tools.protoc \
     --grpc_python_out=grpc \
     grpc/book.proto
 
+- миграции базы данных в контейнере:
+    docker-compose exec book-service alembic upgrade head   
+
+

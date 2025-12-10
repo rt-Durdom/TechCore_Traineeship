@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from app.grpc import book_pb2 as book__pb2
+from module_4.app.grpc import book_pb2 as book__pb2
 
 GRPC_GENERATED_VERSION = '1.76.0'
 GRPC_VERSION = grpc.__version__

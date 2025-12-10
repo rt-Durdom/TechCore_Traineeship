@@ -31,8 +31,8 @@ target_metadata = Base.metadata
 def get_url():
     user = os.getenv('POSTGRES_USER', 'techcore')
     password = os.getenv('POSTGRES_PASSWORD', 'techcore')
-    server = os.getenv('POSTGRES_SERVER', 'localhost')
-    port = os.getenv('POSTGRES_PORT', '5432')  # значение по умолчанию
+    server = os.getenv('POSTGRES_SERVER', 'db')  # здесь исправлено: 'db' для Docker, 'localhost' для локального запуска
+    port = os.getenv('POSTGRES_PORT', '5432')
     db = os.getenv('POSTGRES_DB', 'techcore')
     return f"postgresql://{user}:{password}@{server}:{port}/{db}"
 

@@ -1,5 +1,68 @@
 name: techcore
 services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    restart: unless-stoppde
+
+  book-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    container_name: book-service
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env
+    volumes:
+      - "./module_4:/app/module_4"
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+      - POSTGRES_SERVER=db
+    labels:                                                     
+      - "traefik.enable=true"
+      - "traefik.http.routers.book-service.rule=Host(`book.local`) || PathPrefix(`/api/books`)"
+      - "traefik.http.routers.book-service.entrypoints=web"
+      - "traefik.http.services.book-service.loadbalancer.server.port=8000"
+    depends_on:
+      - db
+      - redis_db
+      - mongo_db
+      - rabbitmq
+      - celery-worker
+      - celery-beat
+      - flower
+      - zookeeper
+      - kafka1
+    restart: unless-stopped
+
+  # gateway:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.gateway
+  #   container_name: gateway
+  #   env_file:
+  #     - ./.env
+  #   depends_on:
+  #     - book-service
+  #   ports:
+  #     - 8080:8080
+  #   environment:
+  #     - BOOK_SERVICE_URL=http://book-service:8000
+  #     - PYTHONPATH=/app/module_11
+  #   restart: unless-stopped
+
   db:
     image: postgres:17-alpine
     container_name: postgres_db
@@ -49,7 +112,7 @@ services:
   celery-worker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.celery
     container_name: celery_worker
     command: python -m celery -A module_4.app_celery.new_app_celery worker --loglevel=info
     depends_on:
@@ -84,7 +147,7 @@ services:
     image: mher/flower:alpine
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.celery
     container_name: flower
     command: python -m celery -A module_4.app_celery.new_app_celery flower --port=5555
     ports:
@@ -122,10 +185,19 @@ services:
     depends_on:
       - zookeeper
   
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem
+    restart: unless-stopped
+  
   analytics-worker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.celery
     command: python -m module_4.app_kafka.consumer
     depends_on:
       - kafka1
@@ -137,7 +209,7 @@ services:
   analytics-worker-async:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.celery
     command: python -m module_4.app_kafka.async_consumer
     depends_on:
       - kafka1
@@ -149,7 +221,7 @@ services:
   faust-worker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.celery
     command: python -m module_4.app_kafka.app_faust
     depends_on:
       - kafka1

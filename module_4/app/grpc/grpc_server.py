@@ -1,10 +1,10 @@
 import asyncio
 import grpc
-from app.models.async_crud import CRUDAsyncBase
-from app.models.books import Book
-from app.models.base import local_async_session
+from module_4.app.models.async_crud import CRUDAsyncBase
+from module_4.app.models.books import Book
+from module_4.app.models.base import local_async_session
 
-from app.grpc import book_pb2, book_pb2_grpc
+from module_4.app.grpc import book_pb2, book_pb2_grpc
 
 
 class BookServiceServicer(book_pb2_grpc.BookServiceServicer):

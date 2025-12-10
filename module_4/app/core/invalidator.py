@@ -1,4 +1,4 @@
-from app.core.db import redis_util
+from module_4.app.core.db import redis_util
 
 
 class Invalidator:

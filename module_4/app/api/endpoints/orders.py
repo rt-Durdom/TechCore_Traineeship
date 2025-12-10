@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app_celery.tasks import process_order
+from module_4.app_celery.tasks import process_order
 
 
 cel_router = APIRouter()

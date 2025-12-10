@@ -8,7 +8,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 
 from .base import Base
-from app.core.db import redis_util
+from module_4.app.core.db import redis_util
 
 ModelType = TypeVar('ModelType', bound=Base)
 
