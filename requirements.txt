@@ -65,6 +65,7 @@ opentelemetry-exporter-otlp==1.39.0
 opentelemetry-exporter-otlp-proto-common==1.39.0
 opentelemetry-exporter-otlp-proto-grpc==1.39.0
 opentelemetry-exporter-otlp-proto-http==1.39.0
+opentelemetry-exporter-zipkin-json==1.39.0
 opentelemetry-instrumentation==0.60b0
 opentelemetry-instrumentation-asgi==0.60b0
 opentelemetry-instrumentation-celery==0.60b0

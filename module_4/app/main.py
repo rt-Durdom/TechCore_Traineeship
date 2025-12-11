@@ -7,9 +7,15 @@ from module_4.app.api.routers import api_router
 from module_4.app.api.endpoints import reviews
 from module_4.app.core.invalidator import in_invalidator
 #from module_4.app_kafka.consumer import consumer
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+from module_4.app.core.opentel_config import zipkin_sevice
 
 
+zipkin_sevice(service_name="book-service", zipkin_endpoint="http://zipkin:9411/api/v2/spans")
 app = FastAPI()
+FastAPIInstrumentor.instrument_app(app)
+HTTPXClientInstrumentor().instrument()
 
 
 @app.on_event('startup')
@@ -34,4 +40,3 @@ async def add_process_time_header(request: Request, call_next):
 
 app.include_router(api_router)
 app.include_router(reviews.router)
-

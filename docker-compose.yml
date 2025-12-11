@@ -45,6 +45,7 @@ services:
       - flower
       - zookeeper
       - kafka1
+      - zipkin
     restart: unless-stopped
 
   # gateway:
