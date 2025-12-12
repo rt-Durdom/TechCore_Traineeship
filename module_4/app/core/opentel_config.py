@@ -23,9 +23,16 @@ def zipkin_sevice(
         )
         span_processor = BatchSpanProcessor(zipkin_exporter)
         tracer_provider.add_span_processor(span_processor)
-        trace.set_tracer_provider(tracer_provider)
-        logger.info(f'OpenTelemetry настроен для {service_name},'
-                    f' экспорт в Zipkin: {zipkin_endpoint}')
+
+        try:
+            trace.set_tracer_provider(tracer_provider)
+            logger.info(f'OpenTelemetry настроен для {service_name},'
+                        f' экспорт в Zipkin: {zipkin_endpoint}')
+        except (ValueError, Exception) as e:
+            if "Overriding" in str(e) or "not allowed" in str(e):
+                logger.info(f'TracerProvider уже установлен, используем существующий для {service_name}')
+            else:
+                logger.warning(f'Не удалось установить TracerProvider для {service_name}: {e}')
 
     except Exception as e:
         logger.error(f'Ошибка настройки OpenTelemetry: {e}', exc_info=True)

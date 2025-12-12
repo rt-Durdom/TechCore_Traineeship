@@ -46,7 +46,7 @@ async def read_book(
         book_info.title,
     )
 
-    return BookDB(
+    return BookRead(
         **jsonable_encoder(book_info),
         #author=AuthorSchema(**author_info)
     )
