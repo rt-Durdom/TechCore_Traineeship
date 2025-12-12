@@ -1,9 +1,11 @@
 import logging
-from opentelemetry import trace
+from opentelemetry import trace, metrics
 from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.resources import Resource
+from opentelemetry.exporter.prometheus import PrometheusMetricReader
+from opentelemetry.sdk.metrics import MeterProvider
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +13,7 @@ logger = logging.getLogger(__name__)
 def zipkin_sevice(
         service_name: str = 'book-service',
         zipkin_endpoint: str = 'http://zipkin:9411/api/v2/spans'):
+    
 
     try:
         resource = Resource.create({
@@ -18,6 +21,21 @@ def zipkin_sevice(
             'service.version': '1.0.0'
         })
         tracer_provider = TracerProvider(resource=resource)
+        
+        # Настройка метрик для Prometheus
+        try:
+            metric_reader = PrometheusMetricReader()
+            metric_provider = MeterProvider(
+                metric_readers=[metric_reader],
+                resource=resource
+            )
+            metrics.set_meter_provider(metric_provider)
+            logger.info(f'Prometheus метрики настроены для {service_name}')
+        except (ValueError, Exception) as e:
+            if "Overriding" in str(e) or "not allowed" in str(e):
+                logger.info(f'MeterProvider уже установлен, используем существующий для {service_name}')
+            else:
+                logger.warning(f'Не удалось установить MeterProvider для {service_name}: {e}')
         zipkin_exporter = ZipkinExporter(
             endpoint=zipkin_endpoint,
         )

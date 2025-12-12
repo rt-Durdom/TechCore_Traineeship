@@ -2,13 +2,15 @@ import time
 
 import asyncio
 from fastapi import FastAPI, Request
+from fastapi.responses import Response
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
 from module_4.app.api.routers import api_router
 from module_4.app.api.endpoints import reviews
 from module_4.app.core.invalidator import in_invalidator
 #from module_4.app_kafka.consumer import consumer
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from module_4.app.core.opentel_config import zipkin_sevice
 
 
@@ -40,3 +42,6 @@ async def add_process_time_header(request: Request, call_next):
 
 app.include_router(api_router)
 app.include_router(reviews.router)
+@app.get("/metrics")
+async def metrics():
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
