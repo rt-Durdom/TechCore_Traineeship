@@ -12,8 +12,10 @@ from module_4.app.api.endpoints import reviews
 from module_4.app.core.invalidator import in_invalidator
 #from module_4.app_kafka.consumer import consumer
 from module_4.app.core.opentel_config import zipkin_sevice
+from module_4.app.core.logging_config import setup_logging
 
 
+setup_logging("book-service")
 zipkin_sevice(service_name="book-service", zipkin_endpoint="http://zipkin:9411/api/v2/spans")
 app = FastAPI()
 FastAPIInstrumentor.instrument_app(app)
