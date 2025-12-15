@@ -54,3 +54,34 @@ def zipkin_sevice(
 
     except Exception as e:
         logger.error(f'Ошибка настройки OpenTelemetry: {e}', exc_info=True)
+
+
+def get_book_counter():
+    try:
+        metric = metrics.get_meter_provider().get_meter(
+            name='book-service',
+            version='1.0.0'
+        )
+
+        book_counter = metric.create_counter(
+            name='books_created_total',
+            description='Счетчик создания книг',
+            unit='1'
+        )
+
+        logger.info('Счетчик книг создан: books_created')
+        return book_counter
+
+    except Exception as e:
+        logger.error(f'Ошибка создания счетчика метрик: {e}', exc_info=True)
+        return None
+
+
+_book_counter = None
+
+
+def get_or_create_book_counter():
+    global _book_counter
+    if _book_counter is None:
+        _book_counter = get_book_counter()
+    return _book_counter

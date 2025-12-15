@@ -10,6 +10,7 @@ from module_4.app.models.base import get_session
 from module_4.app.models.books import Book
 # from module_8.async_core.AsyncClient_service import AuthorService, get_author_service
 from module_4.app_kafka.utils_kafka import send_event_book
+from module_4.app.core.opentel_config import get_or_create_book_counter
 
 router = APIRouter()
 # book_dict = dict()
@@ -23,6 +24,12 @@ router = APIRouter()
 @router.post('/', response_model=BookDB)
 async def create_book(book: BookDB, session: AsyncSession = Depends(get_session)):
     new_book = await CRUDAsyncBase(Book).create(book, session)
+    book_counter = get_or_create_book_counter()
+    if book_counter is not None:
+        book_counter.add(1, attributes={
+            'book.title': book.title,
+            'book.year': str(book.year)
+        })
     return new_book
 
 
