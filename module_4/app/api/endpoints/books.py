@@ -11,6 +11,7 @@ from module_4.app.models.books import Book
 # from module_8.async_core.AsyncClient_service import AuthorService, get_author_service
 from module_4.app_kafka.utils_kafka import send_event_book
 from module_4.app.core.opentel_config import get_or_create_book_counter
+from module_4.app.core.external_client import fetch_external
 
 router = APIRouter()
 # book_dict = dict()
@@ -20,6 +21,12 @@ router = APIRouter()
 # @router.get('/')
 # def read_root():
 #     return {"Hello": "World"}
+
+
+@router.get("/external-check")
+async def external_check():
+    resp = await fetch_external("http://some-unreliable-service/health")
+    return {"status_code": resp.status_code}
 
 @router.post('/', response_model=BookDB)
 async def create_book(book: BookDB, session: AsyncSession = Depends(get_session)):
