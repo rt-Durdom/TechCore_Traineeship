@@ -1,14 +1,19 @@
 from celery import Celery
 from kombu import Queue
+from opentelemetry.instrumentation.celery import CeleryInstrumentor
+from module_4.app.core.opentel_config import zipkin_sevice
 
+zipkin_sevice(service_name="celery-worker", zipkin_endpoint="http://zipkin:9411/api/v2/spans")
 
 celery_app = Celery(
     'worker_celery',
-    broker='amqp://guest:guest@localhost:5672//',
-    backend='redis://localhost:6379/0',
+    broker='amqp://guest:guest@rabbitmq:5672//',
+    backend='redis://redis_db:6379/0',
     include=['module_4.app_celery.tasks',
              'module_4.app_celery.beat_tasks']
 )
+
+CeleryInstrumentor().instrument()
 
 celery_app.conf.update(
     task_acks_late=True,
