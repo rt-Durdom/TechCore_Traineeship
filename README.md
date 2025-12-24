@@ -22,4 +22,8 @@ python -m grpc_tools.protoc \
 - миграции базы данных в контейнере:
     docker-compose exec book-service alembic upgrade head   
 
+- миграции БД для Kubernetes:
+    kubectl get pods -l app=book-service # находим Pod
+    kubectl exec -it fastapi-book-service-xxxxx-xxxxx -- alembic upgrade head   # миграции внутри найденногоPod
+
 
