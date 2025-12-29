@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-book-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: book-service
+  template:
+    metadata:
+      labels:
+        app: book-service
+    spec:
+      containers:
+        - name: fastapi
+          image: fastapi-book-service:k8s
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: book-service-configmap
+          env:
+            - name: POSTGRES_SERVER
+              value: "postgresql-service"

@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import Integer
 from sqlalchemy.orm import (
     declared_attr, mapped_column, declarative_base
@@ -15,7 +16,7 @@ class PreBase:
 
 Base = declarative_base(cls=PreBase)
 
-db_url = 'postgresql+asyncpg://techcore:techcore@db:5432/techcore'
+db_url = os.getenv('DATABASE_URL', 'postgresql+asyncpg://techcore:techcore@db:5432/techcore')
 
 engine = create_async_engine(db_url)
 
