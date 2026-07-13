@@ -3,7 +3,10 @@ from kombu import Queue
 from opentelemetry.instrumentation.celery import CeleryInstrumentor
 from module_4.app.core.opentel_config import zipkin_sevice
 
-zipkin_sevice(service_name="celery-worker", zipkin_endpoint="http://zipkin:9411/api/v2/spans")
+zipkin_sevice(
+    service_name="celery-worker",
+    zipkin_endpoint="http://zipkin:9411/api/v2/spans"
+    )
 
 celery_app = Celery(
     'worker_celery',
@@ -11,7 +14,7 @@ celery_app = Celery(
     backend='redis://redis_db:6379/0',
     include=['module_4.app_celery.tasks',
              'module_4.app_celery.beat_tasks']
-)
+) 
 
 CeleryInstrumentor().instrument()
 
